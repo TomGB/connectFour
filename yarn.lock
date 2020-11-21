@@ -19,6 +19,16 @@ diff@1.0.2:
   resolved "https://registry.yarnpkg.com/diff/-/diff-1.0.2.tgz#4ae73f1aee8d6fcf484f1a1ce77ce651d9b7f0c9"
   integrity sha1-Suc/Gu6Nb89ITxoc53zmUdm38Mk=
 
+esm@^3.2.25:
+  version "3.2.25"
+  resolved "https://registry.yarnpkg.com/esm/-/esm-3.2.25.tgz#342c18c29d56157688ba5ce31f8431fbb795cc10"
+  integrity sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==
+
+geneticalgorithm@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/geneticalgorithm/-/geneticalgorithm-1.0.2.tgz#d84a18d3843f9be822aa133c9d848051e9a7fa33"
+  integrity sha512-p+CMQos1L4MCiW2zVqy3gxbpQiWxW1SCerDYoLelPaSU8TQs7QAaNEllEiHD708QgokU7IVprRcYhRRhYwJQFw==
+
 growl@1.7.x:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/growl/-/growl-1.7.0.tgz#de2d66136d002e112ba70f3f10c31cf7c350b2da"
@@ -31,6 +41,11 @@ jade@0.26.3:
   dependencies:
     commander "0.6.1"
     mkdirp "0.3.0"
+
+js-combinatorics@0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/js-combinatorics/-/js-combinatorics-0.6.1.tgz#d26e9a7aaac03a463611d18309fa9010ff903eff"
+  integrity sha512-VDPHc5J++qdzvngxUhOnUGwegFB9vlNzyWTD6oXKCd9qvw8NAsZdFaWK44W91U0GtBR9R0yppMgzNwTJQYymqg==
 
 mkdirp@0.3.0:
   version "0.3.0"

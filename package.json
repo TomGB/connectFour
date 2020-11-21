@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "esm": "^3.2.25",
+    "geneticalgorithm": "^1.0.2",
+    "js-combinatorics": "0.6.1",
     "nn": "^0.0.7"
   }
 }

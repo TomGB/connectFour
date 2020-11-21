@@ -1,4 +1,6 @@
-var nn = require('nn')
+const nn = require('nn')
+const GeneticAlgorithmConstructor = require('geneticalgorithm')
+var { bigCombination } = require('js-combinatorics')
 
 const randomNet = () => {
     const net = nn({ iterations: 100 })
@@ -114,7 +116,7 @@ const boardToInput = board => {
     return arr
 }
 
-const getNNInput = board => {
+const getNNInput = (board, net) => {
     const actions = net.send(boardToInput(board))
     const orderedActions = Object.entries(actions).sort(([, numA], [, numB]) => numA < numB ? 1 : -1).map(([i]) => Number.parseInt(i))
     
@@ -124,36 +126,73 @@ const getNNInput = board => {
     } while(true)
 }
 
-const run = async ({ vsAI }) => {
+const run = async ({ a, b, vsAI, AIvsAI }) => {
     let board = Array.from(height, () => Array.from(width, () => '-'))
 
-    print(board)
+    // print(board)
 
     let turn = 'x'
 
     do {
-        const input = vsAI && turn === 'o' ? getNNInput(board) : await getInput(turn)
-        console.log(input)
+        let input
+        if (AIvsAI) {
+            input = turn === 'o' ? getNNInput(board, a) : getNNInput(board, b)
+        } else if (vsAI) {
+            input = turn === 'o' ? getNNInput(board, net) : await getInput(turn)
+        }
+        // console.log(input)
         drop(input, board, turn)
-        print(board)
+        // print(board)
         const win = checkWin(board, turn)
         if (win) {
-            console.log(turn + ' WINS \n')
+            // console.log(turn + ' WINS \n')
             return turn
         }
         const draw = checkDraw(board)
         if (draw) {
-            console.log('DRAW \n')
+            // console.log('DRAW \n')
             return 'draw'
         }
         turn = turn === 'x' ? 'o' : 'x'
     } while (true)
 }
 
+const mutationFunction = (genome) => {
+    const randomGeneIndex = Math.floor(Math.random() * genome.length)
+    genome[randomGeneIndex] = Math.random() * 2 - 1
+    return genome
+}
+
+const crossoverFunction = (a, b) => {
+    const newA = []
+    const newB = []
+    a.map((geneA, i) => {
+        if (Math.random() < 0.5) {
+            newA.push(geneA)
+            newB.push(b[i])
+            return
+        }
+        newA.push(b[i])
+        newB.push(geneA)
+    })
+    return [newA, newB]
+}
+
 const start = async () => {
-    do {
-        const outcome = await run({ vsAI: true })
-    } while (true)
+    const population = 100
+
+    const generation = Array.from({ length: population }, () => randomNet())
+
+    const matches = generation.reduce((a, x, i) => {
+        if (i % 2 === 0)
+            a.push(generation.slice(i, i + 2));
+        return a;
+    }, [])
+    const outcome = matches.map(([a, b]) => run({ a, b, AIvsAI: true }) === 'x' ? a : b )
+
+    const outcomes = await Promise.all(outcome)
+
+    
 }
 
 start()
