@@ -1,6 +1,22 @@
 var nn = require('nn')
 
-var net = nn({ iterations: 100 })
+const randomNet = () => {
+    const net = nn({ iterations: 100 })
+
+    net.train([
+        { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [1, 0, 0, 0, 0, 0, 0] },
+        { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 1, 0, 0, 0, 0, 0] },
+        { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 1, 0, 0, 0, 0] },
+        { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 1, 0, 0, 0] },
+        { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 0, 1, 0, 0] },
+        { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 0, 0, 1, 0] },
+        { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 0, 0, 0, 1] },
+    ])
+
+    return net
+}
+
+const net = randomNet()
 
 const readline = require('readline').createInterface({
     input: process.stdin,
@@ -34,21 +50,18 @@ const drop = (col, board, turn) => {
 }
 
 const checkWin = (board, turn) => {
-    board.map(row => {
-        let count = 0
-
-        row.map(x => {
-            if (x === turn) {
-                count++
-                if (count === 4) return true
-            } else {
-                count = 0
-            }
-        })
-    })
-
     const width = 7
     const height = 6
+
+    for (let col = 0; col < width - 3; col++) {
+        for (let row = 0; row < height; row++) {
+            const diag = [board[row][col + 0], board[row][col + 1], board[row][col + 2], board[row][col + 3]]
+            const hasO = diag.includes(turn === 'o' ? 'x' : 'o')
+            const hasD = diag.includes('-')
+
+            if (!hasO && !hasD) return true
+        }
+    }
 
     for (let col = 0; col < width; col++) {
         let count = 0
@@ -84,6 +97,10 @@ const checkWin = (board, turn) => {
     }
 }
 
+const checkDraw = board => {
+    return !board[5].some(x => x === '-')
+}
+
 const width = { length: 7 }
 const height = { length: 6 }
 
@@ -99,8 +116,12 @@ const boardToInput = board => {
 
 const getNNInput = board => {
     const actions = net.send(boardToInput(board))
-    console.log(Object.entries(actions).sort(([, numA], [, numB]) => numA < numB ? 1 : -1).map(([i]) => Number.parseInt(i)))
-    return actions.indexOf(Math.max(...actions))
+    const orderedActions = Object.entries(actions).sort(([, numA], [, numB]) => numA < numB ? 1 : -1).map(([i]) => Number.parseInt(i))
+    
+    do {
+        const action = orderedActions.pop()
+        if (board[5][action] === '-') return action
+    } while(true)
 }
 
 const run = async ({ vsAI }) => {
@@ -116,29 +137,26 @@ const run = async ({ vsAI }) => {
         drop(input, board, turn)
         print(board)
         const win = checkWin(board, turn)
-        if (win) console.log(turn + ' wins')
+        if (win) {
+            console.log(turn + ' WINS \n')
+            return turn
+        }
+        const draw = checkDraw(board)
+        if (draw) {
+            console.log('DRAW \n')
+            return 'draw'
+        }
         turn = turn === 'x' ? 'o' : 'x'
-        if (win) return
     } while (true)
 }
 
 const start = async () => {
     do {
-        await run({ vsAI: true })
+        const outcome = await run({ vsAI: true })
     } while (true)
 }
 
 start()
-
-net.train([
-    { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [1, 0, 0, 0, 0, 0, 0] },
-    { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 1, 0, 0, 0, 0, 0] },
-    { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 1, 0, 0, 0, 0] },
-    { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 1, 0, 0, 0] },
-    { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 0, 1, 0, 0] },
-    { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 0, 0, 1, 0] },
-    { input: Array.from({ length: 7 * 6 }, () => Math.random() * 2 - 1), output: [0, 0, 0, 0, 0, 0, 1] },
-])
 
 const networkToGenome = ({ weights, biases }) => [...weights[1].flatMap(x => x), ...weights[2].flatMap(x => x), ...biases[1], ...biases[2]]
 
